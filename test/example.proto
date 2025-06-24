@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option go_package = "test;example";
+
+// enum Leading comment
+enum Corpus {
+    UNIVERSAL = 0; //enum trailing commnet
+    WEB = 1;
+    IMAGES = 2;
+    LOCAL = 3;
+    NEWS = 4;
+    PRODUCTS = 5;
+    VIDEO = 6;
+}
+
+// Some message
+message Donkey {
+    // Some filed docs
+    string hi = 1;
+}
+
+message Funky {
+    message Monkey {
+        string hi = 1;
+    }
+    Monkey monkey = 1;
+    Donkey dokey = 2;
+}
+
+message SomeRPCRequest {
+    int32 id = 1;
+    string name = 2;
+}
+
+message SomeRPCResponse {
+    string result = 1;
+}
+
+service ExampleService {
+    rpc SomeRPC(SomeRPCRequest) returns (SomeRPCResponse);
+    rpc SomeRPClientStream(stream SomeRPCRequest) returns (SomeRPCResponse);
+    rpc SomeRPCServerStream(SomeRPCRequest) returns (stream SomeRPCResponse);
+    rpc SomeRPCBiDiStream(stream SomeRPCRequest) returns (stream SomeRPCResponse);
+}
