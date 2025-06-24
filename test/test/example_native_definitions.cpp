@@ -1,0 +1,1 @@
+AMX_DEFINE_NATIVE(es_SomeRPC)

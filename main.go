@@ -1,7 +1,7 @@
-// protoc-gen-pawn is a plugin for the Google protocol buffer compiler to generate
+// protobuf-pawn is a plugin for the Google protocol buffer compiler to generate
 // Pawn code. Install it by building this program and making it accessible within
 // your PATH with the name:
-//	protoc-gen-pawn
+//	protobuf-pawn
 //
 // The 'pawn' suffix becomes part of the argument for the protocol compiler,
 // such that it can be invoked as:
@@ -19,9 +19,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"google.golang.org/protobuf/compiler/protogen"
-	"protoc-gen-pawn/generator"
+	"protobuf-pawn/generator"
 	"strings"
+
+	"google.golang.org/protobuf/compiler/protogen"
 )
 
 func main() {
