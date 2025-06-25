@@ -18,9 +18,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"protobuf-pawn/generator"
-	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
 )
@@ -28,7 +26,6 @@ import (
 func main() {
 	var (
 		flags        flag.FlagSet
-		plugins      = flags.String("plugins", "", "list of plugins to enable (supported values: natives)")
 		importPrefix = flags.String("import_prefix", "", "prefix to prepend to import paths")
 	)
 	importRewriteFunc := func(importPath protogen.GoImportPath) protogen.GoImportPath {
@@ -45,27 +42,12 @@ func main() {
 		ParamFunc:         flags.Set,
 		ImportRewriteFunc: importRewriteFunc,
 	}.Run(func(gen *protogen.Plugin) error {
-		natives := false
-		for _, plugin := range strings.Split(*plugins, ",") {
-			switch plugin {
-			case "natives":
-				natives = true
-			case "":
-			default:
-				return fmt.Errorf("protoc-gen-go: unknown plugin %q", plugin)
-			}
-		}
 		for _, f := range gen.Files {
 			if !f.Generate {
 				continue
 			}
 			generator.GenerateIncludeEnumFiles(gen, f)
-			generator.GenerateIncludeNativesFiles(gen, f)
-			generator.GenerateNativeFile(gen, f)
-			generator.GenerateNativeDefinitions(gen, f)
 			generator.GeneratePawnSerializationFile(gen, f)
-			if natives {
-			}
 		}
 		gen.SupportedFeatures = generator.SupportedFeatures
 		return nil

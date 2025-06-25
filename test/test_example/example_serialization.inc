@@ -123,18 +123,15 @@ stock PackDonkey(const data[eDonkey], buffer[], maxSize) {
     }
 
     // Field 2: is_cool
-    // TODO: Unsupported field type
+    if (data[eIsCool]) {
+        EncodeTag(2, WIRE_TYPE_VARINT, buffer, offset);
+        EncodeVarint(data[eIsCool] ? 1 : 0, buffer, offset);
+    }
 
     // Field 3: cool_factor
     if (data[eCoolFactor] != 0.0) {
-        EncodeTag(3, WIRE_TYPE_FIXED64, buffer, offset);
-        EncodeFixed64(_:data[eCoolFactor], buffer, offset);
-    }
-
-    // Field 4: cool_factor_2
-    if (data[eCoolFactor_2] != 0.0) {
-        EncodeTag(4, WIRE_TYPE_FIXED32, buffer, offset);
-        EncodeFixed32(_:data[eCoolFactor_2], buffer, offset);
+        EncodeTag(3, WIRE_TYPE_FIXED32, buffer, offset);
+        EncodeFixed32(_:data[eCoolFactor], buffer, offset);
     }
 
     return offset; // Return total bytes written
@@ -148,9 +145,8 @@ stock UnpackDonkey(const buffer[], bufferSize, data[eDonkey]) {
 
     // Clear the data structure
     data[eHi][0] = 0;
-    data[eIsCool] = 0;
+    data[eIsCool] = false;
     data[eCoolFactor] = 0;
-    data[eCoolFactor_2] = 0;
 
     while (offset < bufferSize) {
         DecodeTag(buffer, offset, bufferSize, fieldNumber, wireType);
@@ -164,18 +160,14 @@ stock UnpackDonkey(const buffer[], bufferSize, data[eDonkey]) {
             }
             case 2: {
                 // is_cool
-                // TODO: Unsupported field type
+                if (wireType == WIRE_TYPE_VARINT) {
+                    data[eIsCool] = bool:(DecodeVarint(buffer, offset, bufferSize) != 0);
+                }
             }
             case 3: {
                 // cool_factor
-                if (wireType == WIRE_TYPE_FIXED64) {
-                    data[eCoolFactor] = Float:DecodeFixed64(buffer, offset);
-                }
-            }
-            case 4: {
-                // cool_factor_2
                 if (wireType == WIRE_TYPE_FIXED32) {
-                    data[eCoolFactor_2] = Float:DecodeFixed32(buffer, offset);
+                    data[eCoolFactor] = Float:DecodeFixed32(buffer, offset);
                 }
             }
             default: {

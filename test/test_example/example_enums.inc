@@ -15,26 +15,26 @@ enum Corpus
 enum eDonkey
 {
 	// Some filed docs
+
 	eHi[256],
-		eIsCool,
-		Float:eCoolFactor,
-		Float:eCoolFactor_2
+	bool:eIsCool,
+	Float:eCoolFactor
 };
 
 enum eFunky
 {
-		eMonkey_msg,
-		eDokey_msg
+	eMonkey_msg,
+	eDokey_msg
 };
 
 enum eSomeRPCRequest
 {
-		eId,
-		eName[256]
+	eId,
+	eName[256]
 };
 
 enum eSomeRPCResponse
 {
-		eResult[256]
+	eResult[256]
 };
 

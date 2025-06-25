@@ -196,6 +196,8 @@ func generateMessageUnpackFunction(g *protogen.GeneratedFile, message *protogen.
 		fieldName := "e" + field.GoName
 		if isStringField(field) {
 			g.P("    data[", fieldName, "][0] = 0;")
+		} else if field.Desc.Kind() == protoreflect.BoolKind {
+			g.P("    data[", fieldName, "] = false;")
 		} else {
 			g.P("    data[", fieldName, "] = 0;")
 		}
@@ -241,6 +243,12 @@ func generateFieldPackCode(g *protogen.GeneratedFile, field *protogen.Field) {
 	g.P("    // Field ", fieldNumber, ": ", field.Desc.Name())
 
 	switch field.Desc.Kind() {
+	case protoreflect.BoolKind:
+		g.P("    if (data[", fieldName, "]) {")
+		g.P("        EncodeTag(", fieldNumber, ", WIRE_TYPE_VARINT, buffer, offset);")
+		g.P("        EncodeVarint(data[", fieldName, "] ? 1 : 0, buffer, offset);")
+		g.P("    }")
+
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Uint32Kind,
 		protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Uint64Kind:
 		g.P("    if (data[", fieldName, "] != 0) {")
@@ -289,6 +297,11 @@ func generateFieldUnpackCode(g *protogen.GeneratedFile, field *protogen.Field) {
 	g.P("                // ", field.Desc.Name())
 
 	switch field.Desc.Kind() {
+	case protoreflect.BoolKind:
+		g.P("                if (wireType == WIRE_TYPE_VARINT) {")
+		g.P("                    data[", fieldName, "] = bool:(DecodeVarint(buffer, offset, bufferSize) != 0);")
+		g.P("                }")
+
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Uint32Kind,
 		protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Uint64Kind:
 		g.P("                if (wireType == WIRE_TYPE_VARINT) {")

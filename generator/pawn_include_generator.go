@@ -1,10 +1,10 @@
 package generator
 
 import (
-	"fmt"
+	"strings"
+
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"strings"
 )
 
 func GenerateIncludeEnumFiles(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
@@ -24,20 +24,6 @@ func GenerateIncludeEnumFiles(gen *protogen.Plugin, file *protogen.File) *protog
 		for _, message := range file.Messages {
 			genMessages(g, message)
 		}
-	}
-
-	return g
-}
-
-func GenerateIncludeNativesFiles(gen *protogen.Plugin, file *protogen.File) *protogen.GeneratedFile {
-	g := gen.NewGeneratedFile(file.GeneratedFilenamePrefix+"_natives.inc", file.GoImportPath)
-
-	for _, service := range file.Services {
-		genNatives(g, service)
-	}
-
-	for _, service := range file.Services {
-		genCallbacks(g, service)
 	}
 
 	return g
@@ -67,10 +53,15 @@ func genMessages(g *protogen.GeneratedFile, message *protogen.Message) {
 	g.P("{")
 	last := len(message.Fields) - 1
 	for idx, field := range message.Fields {
+		// Add comment on separate line if it exists
+		if field.Comments.Leading != "" {
+			g.P("\t", field.Comments.Leading)
+		}
+		// Add field with consistent tabulation
 		if idx != last {
-			g.P("\t", field.Comments.Leading, "\t", genField(field), ",")
+			g.P("\t", genField(field), ",")
 		} else {
-			g.P("\t", field.Comments.Leading, "\t", genField(field))
+			g.P("\t", genField(field))
 		}
 	}
 	g.P("};")
@@ -98,48 +89,11 @@ func genField(field *protogen.Field) string {
 	return builder.String()
 }
 
-func genNatives(g *protogen.GeneratedFile, service *protogen.Service) {
-	g.P("// ----- ", service.GoName, " Natives -----")
-	g.P(service.Comments.Leading)
-	for _, method := range service.Methods {
-		g.P(method.Comments.Leading,
-			"native bool:",
-			getNativeName(service, method),
-			"(", getNativeParams(method), ");",
-			method.Comments.Trailing)
-		g.P()
-	}
-}
-
-func getNativeName(service *protogen.Service, method *protogen.Method) string {
-	return fmt.Sprintf("%s_%s", strings.ToLower(extractCapitals(service.GoName)), method.GoName)
-}
-
-func getNativeParams(method *protogen.Method) string {
-	var strBuilder strings.Builder
-
-	//input params
-	for _, param := range method.Input.Fields {
-		genParam(&strBuilder, param, true)
-		strBuilder.WriteString(", ")
-	}
-
-	//strBuilder params
-	for _, param := range method.Output.Fields {
-		genParam(&strBuilder, param, false)
-		strBuilder.WriteString(", ")
-	}
-
-	out := strBuilder.String()
-	if len(out) > 2 {
-		return out[:len(out)-2]
-	}
-	return out
-}
-
 func getFieldInfo(param *protogen.Field) (prefix string, array int, message bool) {
 	array = 0
 	switch param.Desc.Kind() {
+	case protoreflect.BoolKind:
+		prefix = "bool:"
 	case protoreflect.EnumKind:
 		prefix = param.Enum.GoIdent.GoName + ":"
 	case protoreflect.FloatKind, protoreflect.DoubleKind:
@@ -166,28 +120,4 @@ func getFieldInfo(param *protogen.Field) (prefix string, array int, message bool
 	//}
 
 	return prefix, array, message
-}
-
-func genParam(builder *strings.Builder, param *protogen.Field, inputParam bool) {
-	prefix, array, message := getFieldInfo(param)
-	if array == 0 && !inputParam && !message {
-		builder.WriteRune('&')
-	}
-	if inputParam {
-		builder.WriteString(fmt.Sprintf("const %si_%s", prefix, param.GoName))
-	} else {
-		builder.WriteString(fmt.Sprintf("%so_%s", prefix, param.GoName))
-	}
-	for i := 0; i < array; i++ {
-		builder.WriteString("[]")
-	}
-	if message {
-		builder.WriteRune('[')
-		builder.WriteString(param.Message.GoIdent.GoName)
-		builder.WriteRune(']')
-	}
-}
-
-func genCallbacks(g *protogen.GeneratedFile, service *protogen.Service) {
-
 }
