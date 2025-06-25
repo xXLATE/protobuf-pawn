@@ -63,6 +63,7 @@ func main() {
 			generator.GenerateIncludeNativesFiles(gen, f)
 			generator.GenerateNativeFile(gen, f)
 			generator.GenerateNativeDefinitions(gen, f)
+			generator.GeneratePawnSerializationFile(gen, f)
 			if natives {
 			}
 		}

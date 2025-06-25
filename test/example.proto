@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "test;example";
+option go_package = "test/test_example;example";
 
 // enum Leading comment
 enum Corpus {
@@ -17,6 +17,8 @@ enum Corpus {
 message Donkey {
     // Some filed docs
     string hi = 1;
+    bool is_cool = 2;
+    float cool_factor = 3;
 }
 
 message Funky {
