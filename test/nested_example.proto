@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package test;
+
+option go_package = "test/test_nested_example";
+
+message Address {
+    string street = 1;
+    string city = 2;
+    int32 zip_code = 3;
+}
+
+message Person {
+    string name = 1;
+    int32 age = 2;
+    Address address = 3;
+    repeated string emails = 4;
+    repeated int32 lucky_numbers = 5;
+    repeated Address old_addresses = 6;
+    
+    message PhoneNumber {
+        string number = 1;
+        string type = 2;
+    }
+    
+    repeated PhoneNumber phone_numbers = 7;
+}
+
+message Company {
+    string name = 1;
+    repeated Person employees = 2;
+    Address headquarters = 3;
+} 

@@ -34,3 +34,37 @@ func extractCapitals(input string) string {
 
 	return output.String()
 }
+
+// getMessagePrefix generates message prefix from message name
+func getMessagePrefix(messageName string) string {
+	// For nested messages like "Person_PhoneNumber", use "PPN"
+	if strings.Contains(messageName, "_") {
+		parts := strings.Split(messageName, "_")
+		result := ""
+		for _, part := range parts {
+			if len(part) > 0 {
+				result += strings.ToUpper(part[0:1])
+			}
+		}
+		return result
+	}
+	// For simple messages like "Address", use "A"
+	return strings.ToUpper(messageName[0:1])
+}
+
+// convertFieldName converts snake_case to PascalCase and removes underscores
+func convertFieldName(fieldName string) string {
+	// Convert snake_case like "lucky_numbers" to "LuckyNumbers"
+	if strings.Contains(fieldName, "_") {
+		parts := strings.Split(fieldName, "_")
+		result := ""
+		for _, part := range parts {
+			if len(part) > 0 {
+				result += strings.Title(part)
+			}
+		}
+		return result
+	}
+	// Simple field name, just capitalize first letter
+	return strings.Title(fieldName)
+}
